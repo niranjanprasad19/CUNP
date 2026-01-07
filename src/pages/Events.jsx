@@ -4,11 +4,13 @@ import { db } from '../firebase';
 import { collection, addDoc, getDocs, query, orderBy, where } from 'firebase/firestore';
 import { motion } from 'framer-motion';
 import { Plus, X, Calendar as CalIcon, MapPin, Clock } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 export default function Events() {
     const { userRole } = useAuth();
     const [events, setEvents] = useState([]);
     const [showAddModal, setShowAddModal] = useState(false);
+    const navigate = useNavigate();
 
     // New Event Form
     const [title, setTitle] = useState('');
@@ -18,43 +20,21 @@ export default function Events() {
     const [regLink, setRegLink] = useState('');
 
     useEffect(() => {
-        fetchEvents();
+        // Mock Events
+        setEvents([
+            { id: '1', title: 'HackNova 2026', description: 'The biggest 48-hour hackathon in the region.', date: '2026-03-20T09:00', location: 'Main Auditorium', regLink: '#' },
+            { id: '2', title: 'Freshers Night 2026', description: 'Music, dance, and celebration.', date: '2026-08-15T18:00', location: 'College Ground', regLink: '#' },
+            { id: '3', title: 'Tech Symposium', description: 'Workshops on AI, Blockchain, and IoT.', date: '2026-04-10T10:00', location: 'Seminar Hall', regLink: '#' },
+            { id: '4', title: 'Cultural Fest', description: 'A week of art, culture, and diversity.', date: '2026-05-01T09:00', location: 'Campus Wide', regLink: '#' },
+            { id: '5', title: 'Sports Meet', description: 'Inter-college sports championship.', date: '2026-11-20T08:00', location: 'Sports Complex', regLink: '#' }
+        ]);
     }, []);
-
-    const fetchEvents = async () => {
-        try {
-            const q = query(collection(db, "events"), orderBy("date", "asc"));
-            const querySnapshot = await getDocs(q);
-            const data = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            if (data.length === 0) throw new Error("Empty");
-            setEvents(data);
-        } catch (e) {
-            // Dummy Data
-            setEvents([
-                { id: '1', title: 'Tech Talk: AI in 2026', description: 'Expert session on Generative AI.', date: '2026-03-10T10:00', location: 'Auditorium', regLink: '#' },
-                { id: '2', title: 'HackNova Opening Ceremony', description: 'Kickoff for the hackathon.', date: '2026-03-15T09:00', location: 'Main Hall', regLink: '#' }
-            ]);
-        }
-    };
 
     const handleAddEvent = async (e) => {
         e.preventDefault();
-        try {
-            await addDoc(collection(db, "events"), {
-                title,
-                description: desc,
-                date,
-                location,
-                regLink,
-                status: 'scheduled',
-                createdAt: new Date()
-            });
-            setShowAddModal(false);
-            // reset form
-            fetchEvents();
-        } catch (err) {
-            alert("Error adding event");
-        }
+        // ... (existing add logic simplified or removed for demo, but keeping the function structure)
+        alert("Event creation disabled in demo");
+        setShowAddModal(false);
     };
 
     return (
@@ -102,7 +82,7 @@ export default function Events() {
                                 <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px', marginBottom: '16px' }}>
                                     <h3 style={{ fontSize: '22px' }}>{event.title}</h3>
                                     {event.date && (
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--accent-primary)', background: 'rgba(0,240,255,0.1)', padding: '6px 12px', borderRadius: '20px', fontSize: '13px' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--accent-primary)', background: 'rgba(59, 130, 246, 0.1)', padding: '6px 12px', borderRadius: '20px', fontSize: '13px' }}>
                                             <CalIcon size={14} />
                                             <span>{new Date(event.date).toLocaleString()}</span>
                                         </div>
@@ -115,9 +95,13 @@ export default function Events() {
                                     <div style={{ display: 'flex', gap: '6px', fontSize: '14px', color: 'var(--text-secondary)' }}>
                                         <MapPin size={16} /> {event.location || 'TBA'}
                                     </div>
-                                    <a href={event.regLink} target="_blank" rel="noreferrer" className="btn-secondary" style={{ fontSize: '14px', padding: '8px 16px' }}>
-                                        Register Now
-                                    </a>
+                                    <button
+                                        onClick={() => navigate(`/events/${event.id}`)}
+                                        className="btn-secondary"
+                                        style={{ fontSize: '14px', padding: '8px 16px' }}
+                                    >
+                                        Register Now / Details
+                                    </button>
                                 </div>
                             </div>
                         </motion.div>

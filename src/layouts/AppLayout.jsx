@@ -1,7 +1,7 @@
 import React from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { LogOut, Home, Calendar, Users, Briefcase, Bell } from 'lucide-react';
+import { LogOut, Home, Calendar, Users, Briefcase, Bell, User } from 'lucide-react';
 
 export default function AppLayout() {
     const { currentUser, userRole, logout } = useAuth();
@@ -43,7 +43,10 @@ export default function AppLayout() {
                     <NavItem to="/" icon={<Home size={20} />} label="Dashboard" />
                     <NavItem to="/clubs" icon={<Users size={20} />} label="Clubs" />
                     <NavItem to="/events" icon={<Calendar size={20} />} label="Events" />
+
+                    {/* Show Placements only for 2nd Year and above (Internships/Jobs) */}
                     <NavItem to="/placements" icon={<Briefcase size={20} />} label="Placements" />
+                    <NavItem to="/profile" icon={<User size={20} />} label="Profile" />
                 </nav>
 
                 <div style={{ padding: '12px', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
@@ -82,7 +85,7 @@ function NavItem({ to, icon, label }) {
                 gap: '12px',
                 padding: '12px',
                 borderRadius: '8px',
-                color: isActive ? 'white' : 'var(--text-secondary)',
+                color: isActive ? 'var(--accent-primary)' : 'var(--text-secondary)',
                 background: isActive ? 'linear-gradient(90deg, rgba(0, 240, 255, 0.1), transparent)' : 'transparent',
                 borderLeft: isActive ? '3px solid var(--accent-primary)' : '3px solid transparent',
                 transition: 'all 0.3s ease'

@@ -8,7 +8,7 @@ import {
     GoogleAuthProvider,
     signInWithPopup
 } from 'firebase/auth';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, onSnapshot } from 'firebase/firestore';
 
 const AuthContext = createContext();
 
@@ -80,35 +80,68 @@ export function AuthProvider({ children }) {
     }
 
     useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, async (user) => {
-            setCurrentUser(user);
+        let unsubscribeDoc = null;
+
+        const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
             if (user) {
-                // Fetch role
-                try {
-                    const docRef = doc(db, "users", user.uid);
-                    const docSnap = await getDoc(docRef);
+                // Realtime listener for user profile
+                unsubscribeDoc = onSnapshot(doc(db, "users", user.uid), (docSnap) => {
                     if (docSnap.exists()) {
-                        setUserRole(docSnap.data().role);
+                        const userData = docSnap.data();
+                        setUserRole(userData.role);
+                        setCurrentUser({ ...user, ...userData });
+                    } else {
+                        // Fallback if doc doesn't exist yet
+                        setCurrentUser(user);
+                        setUserRole(null);
                     }
-                } catch (error) {
-                    console.error("Error fetching user role:", error);
-                }
+                }, (error) => {
+                    console.error("Error fetching user data:", error);
+                    setCurrentUser(user);
+                });
             } else {
+                if (unsubscribeDoc) unsubscribeDoc();
+                setCurrentUser(null);
                 setUserRole(null);
             }
             setLoading(false);
         });
 
-        return unsubscribe;
+        return () => {
+            if (unsubscribeAuth) unsubscribeAuth();
+            if (unsubscribeDoc) unsubscribeDoc();
+        };
     }, []);
+
+    const [subscribedClubs, setSubscribedClubs] = useState([]);
+
+    const subscribeToClub = (club) => {
+        setSubscribedClubs(prev => {
+            if (prev.find(c => c.id === club.id)) return prev;
+            return [...prev, club];
+        });
+    };
+
+    const unsubscribeFromClub = (clubId) => {
+        setSubscribedClubs(prev => prev.filter(c => c.id !== clubId));
+    };
+
+    const loginAsDemo = (role) => {
+        setCurrentUser({ uid: `demo-${role}`, email: `${role}@cunp.com`, displayName: `Demo ${role}`, year: 4, branch: 'CSE', rollNumber: '2022CS001' });
+        setUserRole(role);
+    };
 
     const value = {
         currentUser,
         userRole,
+        subscribedClubs,
         signup,
         login,
         googleLogin,
-        logout
+        logout,
+        subscribeToClub,
+        unsubscribeFromClub,
+        loginAsDemo
     };
 
     return (

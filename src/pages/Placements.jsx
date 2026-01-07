@@ -4,9 +4,11 @@ import { db } from '../firebase';
 import { collection, addDoc, getDocs, query, where, orderBy } from 'firebase/firestore';
 import { motion } from 'framer-motion';
 import { Briefcase, Building, ExternalLink, Plus, X } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 export default function Placements() {
-    const { userRole, currentUser } = useAuth(); // Assume we might store year/sem in currentUser later
+    const { userRole, currentUser } = useAuth();
+    const navigate = useNavigate();
     const [placements, setPlacements] = useState([]);
     const [showAddModal, setShowAddModal] = useState(false);
 
@@ -96,9 +98,20 @@ export default function Placements() {
                             <p>Deadline: {new Date(job.deadline).toLocaleDateString()}</p>
                         </div>
 
-                        <a href={job.link} target="_blank" rel="noreferrer" className="btn-secondary" style={{ width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px' }}>
+                        <button
+                            onClick={() => {
+                                const year = currentUser?.year || 1; // Default to 1 if not set
+                                if (year < 3) {
+                                    alert(`You are in year ${year}. Placements are only for 3rd and 4th year students.`);
+                                } else {
+                                    navigate(`/placements/${job.id}`);
+                                }
+                            }}
+                            className="btn-secondary"
+                            style={{ width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px' }}
+                        >
                             Apply Now <ExternalLink size={16} />
-                        </a>
+                        </button>
                     </motion.div>
                 ))}
             </div>

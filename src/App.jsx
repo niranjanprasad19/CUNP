@@ -4,8 +4,12 @@ import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Clubs from './pages/Clubs';
 import Events from './pages/Events';
+import EventDetails from './pages/EventDetails';
 import Placements from './pages/Placements';
+import JobDetails from './pages/JobDetails';
+import Profile from './pages/Profile';
 import AppLayout from './layouts/AppLayout';
+import Onboarding from './pages/Onboarding';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 
 // Protected Route Component
@@ -23,6 +27,7 @@ export default function App() {
     <AuthProvider>
       <Routes>
         <Route path="/login" element={<Login />} />
+        <Route path="/onboarding" element={<Onboarding />} />
 
         <Route path="/" element={
           <ProtectedRoute>
@@ -32,7 +37,10 @@ export default function App() {
           <Route index element={<Dashboard />} />
           <Route path="clubs" element={<Clubs />} />
           <Route path="events" element={<Events />} />
+          <Route path="events/:id" element={<EventDetails />} />
           <Route path="placements" element={<Placements />} />
+          <Route path="placements/:id" element={<JobDetails />} />
+          <Route path="profile" element={<Profile />} />
         </Route>
       </Routes>
     </AuthProvider>
